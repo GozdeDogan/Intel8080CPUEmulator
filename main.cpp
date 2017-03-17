@@ -1,0 +1,32 @@
+#include <iostream>
+#include "8080emuCPP.h"
+#include "gtuos.h"
+
+using namespace std;
+
+int main (int argc, char**argv)
+{
+	if (argc != 3){
+		std::cerr << "Usage: prog exeFile debugOption\n";
+		exit(1); 
+	}
+	int DEBUG = atoi(argv[2]);
+    int cycle = 0;
+	CPU8080 theCPU;
+	GTUOS	theOS;
+
+	theCPU.ReadFileIntoMemoryAt(argv[1], 0x0000);	
+
+	while (!theCPU.isHalted())
+	{
+		theCPU.Emulate8080p(DEBUG);
+		if(theCPU.isSystemCall())
+			theOS.handleCall(theCPU);
+		if(DEBUG == 2)
+		    cin.get();
+	    cycle += theOS.calculateCycle(theCPU);
+	}
+	cout << "Total number of cycles " << cycle << endl;
+	return 0;
+}
+
